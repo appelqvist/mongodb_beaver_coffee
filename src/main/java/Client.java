@@ -18,9 +18,9 @@ public class Client {
     private Product productCollection;
     private Stock stockCollection;
 
-    public Client(String host, int port){
+    public Client(String host){
         //instance the client
-        mongoClient = new MongoClient(host, port);
+        mongoClient = new MongoClient(host);
 
         //open database
         mongoDatabase = mongoClient.getDatabase("BeaverCoffee");

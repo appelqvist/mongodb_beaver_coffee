@@ -8,6 +8,6 @@ import com.mongodb.client.MongoDatabase;
 public class Main {
     public static void main(String[] args) {
         System.out.println("Starting up mongo-db..");
-        new Client("localhost", 3665).start();
+        new Client("localhost").start();
     }
 }
