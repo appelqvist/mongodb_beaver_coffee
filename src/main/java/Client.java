@@ -56,6 +56,9 @@ public class Client {
                 case 2 :
                     customerPick();
                     break;
+                case 9:
+                    employeeCollection.getEmployees(1);
+                    break;
                 case 0 :
                     System.exit(0);
                     break;
@@ -120,6 +123,8 @@ public class Client {
                             "Format: YYYY-MM-DD");
                     String workingTime = JOptionPane.showInputDialog("Choose working time (%):");
                     String storeID = JOptionPane.showInputDialog("Select id of the store:\n(hämta alla store och visa här)");
+
+                    //Why do this here? Need to make a comment in
                     String msg = "Need employee";
                     String date = startDate;
                     String eeID = "Admin";
@@ -152,7 +157,7 @@ public class Client {
     }
 
     private void fillList(String everything){
-        int chooce = Integer.parseInt(JOptionPane.showInputDialog(everything));
+        int choice = Integer.parseInt(JOptionPane.showInputDialog(everything));
 
     }
 
