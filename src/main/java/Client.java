@@ -32,7 +32,9 @@ public class Client {
     private Product productCollection;
     private Stock stockCollection;
     private ArrayList<Product> productList = new ArrayList<Product>();
-
+    private String coffee = "0";
+    private String milk = "0";
+    private String syrup = "0";
     public Client(String host) {
         //instance the client
         mongoClient = new MongoClient(host);
@@ -60,6 +62,7 @@ public class Client {
                     "1: Employee \n" +
                     "2: Customer \n" +
                     "3: Store \n" +
+                    "4: Chose product\n" +
                     "0: Exit"));
             switch (choice) {
                 case 1:
@@ -70,6 +73,9 @@ public class Client {
                     break;
                 case 3:
                     storePick();
+                    break;
+                case 4:
+                    productPick();
                     break;
                 case 0:
                     System.exit(0);
@@ -121,6 +127,114 @@ public class Client {
                     oldCustomer();
                     break;
                 default:
+                    break;
+            }
+        }
+    }
+
+    private void productPick(){
+        while (true) {
+            int choice;
+            choice = Integer.parseInt(JOptionPane.showInputDialog("1: Esspresso\n" +
+                    "2: Latte\n" +
+                    "3: Cappochino\n" +
+                    "4: Hot Coco\n" +
+                    "5: Brewed Coffee\n" +
+                    "0: Exit products"));
+            switch (choice) {
+                case 0:
+                    System.exit(0);
+                case 1:
+                    coffee = "1";
+                   // storeCollection.update(coffee,milk,syrup);
+                    break;
+                case 2:
+                    coffee = "1";
+                    milkPick();
+                    break;
+                case 3:
+                    coffee = "1";
+                    milkPick();
+                    break;
+                case 4:
+                    milkPick();
+                    coffee = "4";
+                    break;
+                case 5:
+                    coffeePick();
+            }
+        }
+    }
+    private void milkPick(){
+        while (true) {
+            int choice;
+            choice = Integer.parseInt(JOptionPane.showInputDialog("1: Skim milk\n" +
+                    "2: Soy milk\n" +
+                    "3: Whole milk\n" +
+                    "4: 2% milk\n" +
+                    "0: Exit milk"));
+            switch (choice) {
+                case 0:
+                    return;
+                case 1:
+                    milk = "5";
+                    syrupPick();
+                    break;
+                case 2:
+                    milk = "6";
+                    syrupPick();
+                    break;
+                case 3:
+                    milk = "7";
+                    syrupPick();
+                    break;
+                case 4:
+                    milk = "8";
+                    syrupPick();
+                    break;
+            }
+        }
+    }
+    private void syrupPick(){
+        while (true) {
+            int choice;
+            choice = Integer.parseInt(JOptionPane.showInputDialog("1: Vanilla\n" +
+                    "2: Caramel\n" +
+                    "3: Irish\n" +
+                    "0: Exit product"));
+            switch (choice) {
+                case 0:
+                    System.out.println(coffee +" " + milk+ " "+ syrup);
+                    //storeCollection.updateStock(coffee,milk,syrup);
+                    System.exit(0);
+                case 1:
+                    syrup = "9";
+                    break;
+                case 2:
+                    syrup = "10";
+                    break;
+                case 3:
+                    syrup = "11";
+                    break;
+            }
+        }
+    }
+    private void coffeePick(){
+        while (true) {
+            int choice;
+            choice = Integer.parseInt(JOptionPane.showInputDialog("1: French roast\n" +
+                    "2: Light roast\n" +
+                    "0: Exit coffee"));
+            switch(choice){
+                case 0:
+                    return;
+                case 1:
+                    coffee = "2";
+                    milkPick();
+                    break;
+                case 2:
+                    coffee = "3";
+                    milkPick();
                     break;
             }
         }
