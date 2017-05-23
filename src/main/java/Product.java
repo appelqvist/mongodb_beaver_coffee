@@ -6,12 +6,12 @@ import java.util.ArrayList;
 public class Product {
     public String name;
     public int price;
-    public ArrayList<Ingredient> ingredientArrayList;
+    private int stockId;
 
-    public Product(String name, int price, ArrayList<Ingredient> ingredients){
+    public Product(String name, int price, int stockId) {
         this.name = name;
         this.price = price;
-        this.ingredientArrayList = ingredients;
+        this.stockId = stockId;
     }
 
     public String getName(){
@@ -22,8 +22,8 @@ public class Product {
         return price;
     }
 
-    public ArrayList<Ingredient> getIngredients(){
-        return ingredientArrayList;
+    public int getStockId(){
+        return stockId;
     }
 
     public String getInfo(){
