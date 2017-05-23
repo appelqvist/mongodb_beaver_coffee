@@ -2,6 +2,7 @@ import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.model.Updates;
 import jdk.internal.org.objectweb.asm.tree.analysis.Value;
 import org.bson.Document;
 import org.bson.types.ObjectId;
@@ -15,7 +16,12 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedList;
+import java.util.List;
+
+import static com.mongodb.client.model.Filters.all;
+import static com.mongodb.client.model.Filters.eq;
 
 /**
  * Created by Andréas Appelqvist on 2017-05-15.
@@ -27,10 +33,8 @@ public class Client {
     private Customer customerCollection;
     private Employee employeeCollection;
     private Store storeCollection;
-    private Manager managerCollection;
     private Order orderCollection;
     private Product productCollection;
-    private Stock stockCollection;
     private ArrayList<Order> orderList = new ArrayList<Order>();
     private int coffee = 0;
     private int milk = 0;
@@ -45,11 +49,11 @@ public class Client {
         mongoDatabase = mongoClient.getDatabase("BeaverCoffee");
 
         //Setting up the different collections as classes.
-        //customerCollection = new Customer(mongoDatabase);
+        customerCollection = new Customer(mongoDatabase);
         employeeCollection = new Employee(mongoDatabase);
         storeCollection = new Store(mongoDatabase);
         //managerCollection = new Manager(mongoDatabase);
-        //orderCollection = new Order(mongoDatabase);
+        orderCollection = new Order(mongoDatabase);
         //productCollection = new Product(mongoDatabase);
         //stockCollection = new Stock(mongoDatabase);
     }
@@ -78,12 +82,8 @@ public class Client {
                     break;
                 case 4:
                     productPick();
-                    orderList.add(new Order(new ObjectId("StoreID"),
-                            new ObjectId("eID"),
-                            new ObjectId("cID"),
-                            "89-06-21",
-                            new Product("Coffee", 100, coffee)));
-                    storeCollection.updateStock(orderList);
+                    break;
+                case 9:
                     break;
                 case 0:
                     System.exit(0);
@@ -121,18 +121,19 @@ public class Client {
 
     private void customerPick() {
         while (true) {
-            int choice = Integer.parseInt(JOptionPane.showInputDialog("1: New Customer\n" +
+            int choice = Integer.parseInt(JOptionPane.showInputDialog("" +
+                    "Do purchase as:" +
+                    "1: New Customer\n" +
                     "2: Old Customer \n" +
                     "0: Exit customer"));
             switch (choice) {
                 case 0:
-                    start();
-                    break;
+                    return;
                 case 1:
-                    newCustomer();
+                    doPurchase(false);
                     break;
                 case 2:
-                    oldCustomer();
+                    doPurchase(true);
                     break;
                 default:
                     break;
@@ -140,119 +141,203 @@ public class Client {
         }
     }
 
-    private void productPick(){
+    private ObjectId addCustomerPick() {
+        ObjectId newCustomerId = customerCollection.addCustomer();
+
+        int choice = Integer.parseInt(JOptionPane.showInputDialog("Want to be beavermember?\n" +
+                "1: YES\n" +
+                "2: NO"));
+        if(choice == 1){
+            addBeaverMemberPick(newCustomerId);
+        }
+
+        return newCustomerId;
+    }
+
+    private void addBeaverMemberPick(ObjectId customer){
+
+        String ssn = JOptionPane.showInputDialog("Customers SSN:");
+        String occupation = JOptionPane.showInputDialog("Customers occupation");
+        ObjectId storeid = pickStoreID();
+        String city = JOptionPane.showInputDialog("Customers city:");
+        String street = JOptionPane.showInputDialog("Customers street:");
+        String country = JOptionPane.showInputDialog("Customers country:");
+
+        customerCollection.addBeaverClub(customer,ssn,occupation,storeid,city,street,country);
+    }
+
+    private void doPurchase(boolean old){
+        ObjectId customerID;
+        if(old){
+            LinkedList<String> allids = customerCollection.getAllCustomers();
+            String s = "Pick your id:\n";
+
+            int i = 0;
+            for(String id : allids){
+                s +=  i+" : " + id + "\n";
+                i ++;
+            }
 
             int choice;
+            do{
+               choice = Integer.parseInt(JOptionPane.showInputDialog(s));
+            }while (choice < 0 || choice > allids.size());
+
+            customerID = new ObjectId(allids.get(choice));
+        }
+        else{
+            customerID = addCustomerPick();
+        }
+
+        JOptionPane.showMessageDialog(null, "Du har nr:"+customerID.toString()+"\n" +
+                "fortsätt gärna!");
+
+        orderPick(pickStoreID(), customerID);
+    }
+
+    private void orderPick(ObjectId storeID, ObjectId customerID){
+        int choice;
+        LinkedList list = new LinkedList<Document>();
+        do {
+            Document product = productPick();
+            list.add(product);
+            choice = Integer.parseInt(JOptionPane.showInputDialog("Buy another product?\n" +
+                    "1: YES!\n" +
+                    "2: NO"));
+        }while(choice != 2);
+
+
+
+        Document order = new Document("storeID", storeID)
+                .append("customerID", customerID)
+                .append("employeeID", pickEmployeeID(storeID))
+                .append("products", list);
+
+
+        //Efter godkänande!!!
+        orderCollection.addOrder(order); //Efter koll att inga behövs göras eller fråga en kund om du är redo
+    }
+
+    /**
+     * Returns a document of ONE product
+     * @return
+     */
+    private Document productPick() {
+        Document product = new Document();
+
+        int choice;
+        do {
             choice = Integer.parseInt(JOptionPane.showInputDialog("1: Esspresso\n" +
                     "2: Latte\n" +
                     "3: Cappochino\n" +
                     "4: Hot Coco\n" +
-                    "5: Brewed Coffee\n" +
-                    "0: Exit products"));
-            switch (choice) {
-                case 0:
-                    System.exit(0);
-                case 1:
-                    coffee = 1; //Esspresso
-                    break;
-                case 2:
-                    coffee = 2; //Latte
-                    milkPick();
-                    break;
-                case 3:
-                    coffee = 3; //Cappochino
-                    milkPick();
-                    break;
-                case 4:
-                    coffee = 4; //Hot coco
-                    milkPick();
-                    break;
-                case 5:
-                    coffee = 5; //Brewed Coffee
-                    beanPick();
-                    break;
-            }
+                    "5: Brewed Coffee\n"));
+        } while (choice <= 0 || choice > 5);
 
-    }
-    private void milkPick(){
+        switch (choice) {
+            case 1:
+                coffee = 1; //Esspresso
+                product.append("name", "Esspresso")
+                        .append("price", 10)
+                        .append("ingredients", Arrays.asList(
+                                new Document("ingredientsID", 1)
+                        ));
+                break;
+            case 2:
+                coffee = 2; //Latte
+                milkPick();
+                break;
+            case 3:
+                coffee = 3; //Cappochino
+                milkPick();
+                break;
+            case 4:
+                coffee = 4; //Hot coco
+                milkPick();
+                break;
+            case 5:
+                coffee = 5; //Brewed Coffee
+                beanPick();
+                break;
+        }
 
-            int choice;
-            choice = Integer.parseInt(JOptionPane.showInputDialog("1: Skim milk\n" +
-                    "2: Soy milk\n" +
-                    "3: Whole milk\n" +
-                    "4: 2% milk\n" +
-                    "0: Exit milk"));
-            switch (choice) {
-                case 0:
-                    milk = 0;
-                    break;
-                case 1:
-                    milk = 5;
-                    syrupPick();
-                    break;
-                case 2:
-                    milk = 6;
-                    syrupPick();
-                    break;
-                case 3:
-                    milk = 7;
-                    syrupPick();
-                    break;
-                case 4:
-                    milk = 8;
-                    syrupPick();
-                    break;
-            }
-    }
-    private void syrupPick(){
-
-            int choice;
-            choice = Integer.parseInt(JOptionPane.showInputDialog("1: Vanilla\n" +
-                    "2: Caramel\n" +
-                    "3: Irish\n" +
-                    "0: Exit product"));
-            switch (choice) {
-                case 0:
-                    System.out.println(coffee +" " + milk+ " "+ syrup);
-                    //storeCollection.updateStock(coffee,milk,syrup);
-                    System.exit(0);
-                case 1:
-                    syrup = 9;
-                    break;
-                case 2:
-                    syrup = 10;
-                    break;
-                case 3:
-                    syrup = 11;
-                    break;
-            }
-    }
-    private void beanPick(){
-            int choice;
-            choice = Integer.parseInt(JOptionPane.showInputDialog("1: French roast\n" +
-                    "2: Light roast\n" +
-                    "0: Exit coffee"));
-            switch(choice){
-                case 0:
-                    bean = 0;
-                    break;
-                case 1:
-                    bean = 2;
-                    milkPick();
-                    break;
-                case 2:
-                    bean = 3;
-                    milkPick();
-                    break;
-            }
-
+        return product;
     }
 
-    private void newCustomer() {
-        String storeID = "Malmo3300";
-        int coffeeCounter = 0;
+    private void milkPick() {
 
-        testList();
+        int choice;
+        choice = Integer.parseInt(JOptionPane.showInputDialog("1: Skim milk\n" +
+                "2: Soy milk\n" +
+                "3: Whole milk\n" +
+                "4: 2% milk\n" +
+                "0: Exit milk"));
+        switch (choice) {
+            case 0:
+                milk = 0;
+                break;
+            case 1:
+                milk = 5;
+                syrupPick();
+                break;
+            case 2:
+                milk = 6;
+                syrupPick();
+                break;
+            case 3:
+                milk = 7;
+                syrupPick();
+                break;
+            case 4:
+                milk = 8;
+                syrupPick();
+                break;
+        }
+    }
+
+    private void syrupPick() {
+
+        int choice;
+        choice = Integer.parseInt(JOptionPane.showInputDialog("1: Vanilla\n" +
+                "2: Caramel\n" +
+                "3: Irish\n" +
+                "0: Exit product"));
+        switch (choice) {
+            case 0:
+                System.out.println(coffee + " " + milk + " " + syrup);
+                //storeCollection.updateStock(coffee,milk,syrup);
+                System.exit(0);
+            case 1:
+                syrup = 9;
+                break;
+            case 2:
+                syrup = 10;
+                break;
+            case 3:
+                syrup = 11;
+                break;
+        }
+    }
+
+    private void beanPick() {
+        int choice;
+        choice = Integer.parseInt(JOptionPane.showInputDialog("1: French roast\n" +
+                "2: Light roast\n" +
+                "0: Exit coffee"));
+        switch (choice) {
+            case 0:
+                bean = 0;
+                break;
+            case 1:
+                bean = 2;
+                milkPick();
+                break;
+            case 2:
+                bean = 3;
+                milkPick();
+                break;
+        }
+
     }
 
     private void oldCustomer() {
@@ -297,7 +382,7 @@ public class Client {
                     int c;
                     do {
                         c = Integer.parseInt(JOptionPane.showInputDialog(select));
-                    }while (c < 0 || c > employees.size());
+                    } while (c < 0 || c > employees.size());
                     ObjectId employeeID = employees.get(c).getObjectId("_id");
 
                     String msg = JOptionPane.showInputDialog("Write your msg:");
@@ -308,6 +393,34 @@ public class Client {
                     break;
             }
         }
+    }
+
+    private ObjectId pickEmployeeID(ObjectId storeID){
+        String[] names;
+        ObjectId[] ids;
+        LinkedList<Document> allEmployees = employeeCollection.getEmployees(storeID);
+
+        names = new String[allEmployees.size()];
+        ids = new ObjectId[allEmployees.size()];
+        Document d;
+
+        for (int i = 0; i < names.length; i++) {
+            d = allEmployees.removeFirst();
+            names[i] = String.valueOf(d.get("name"));
+            ids[i] = (ObjectId) d.get("_id");
+        }
+
+        int id = -1;
+        do {
+            String out = "Select id of employee you want to handle your order:\n";
+            for (int i = 0; i < names.length; i++) {
+                out += i + ": " + names[i] + "\n";
+            }
+            id = Integer.parseInt(JOptionPane.showInputDialog(out));
+
+        } while (id < 0 || id > names.length);
+
+        return ids[id];
     }
 
     private ObjectId pickStoreID() {

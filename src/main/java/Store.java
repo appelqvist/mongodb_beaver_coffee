@@ -56,17 +56,23 @@ public class Store {
         return stores;
     }
 
+    /*
     public void updateStock(ArrayList<Order> order){
         for (int i = 0; i < order.size(); i ++){
             sendToStock(order.get(i));
         }
     }
 
+
+    */
     /**
      * Need store
      * Need id that is going to be updated
      * @param order
      */
+
+        /*
+
     private void sendToStock(Order order){
         int stockId = order.getProduct().getStockId();
         ObjectId objectId = order.getStoreId();
@@ -104,5 +110,6 @@ public class Store {
                 ));
     }
 
+    */
 
 }

@@ -1,42 +1,26 @@
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoDatabase;
+import org.bson.Document;
 import org.bson.types.ObjectId;
 
+import javax.print.Doc;
 import java.util.ArrayList;
 
 /**
  * Created by davve on 2017-05-15.
  */
 public class Order {
-    private ObjectId storeId;
-    private ObjectId eId;
-    private ObjectId cId;
-    private String date;
-    private Product product;
+    private MongoCollection<Document> collection;
 
-    public Order(ObjectId storeId, ObjectId eId, ObjectId cId, String date, Product product) {
-        this.storeId = storeId;
-        this.eId = eId;
-        this.cId = cId;
-        this.date = date;
-        this.product = product;
+    public Order(MongoDatabase database) {
+        collection = database.getCollection("order");
     }
 
-    public ObjectId getStoreId(){
-        return storeId;
+    public void addOrder(Document d){
+        collection.insertOne(d);
     }
 
-    public ObjectId geteId(){
-        return eId;
-    }
+    public void getOrder(ObjectId orderID){
 
-    public ObjectId getcId(){
-        return cId;
-    }
-
-    public String getDate(){
-        return date;
-    }
-
-    public Product getProduct(){
-        return product;
     }
 }
