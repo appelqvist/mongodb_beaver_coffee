@@ -36,10 +36,7 @@ public class Client {
     private Order orderCollection;
     private Product productCollection;
     private ArrayList<Order> orderList = new ArrayList<Order>();
-    private int coffee = 0;
-    private int milk = 0;
-    private int syrup = 0;
-    private int bean = 0;
+
 
     public Client(String host) {
         //instance the client
@@ -224,48 +221,76 @@ public class Client {
      */
     private Document productPick() {
         Document product = new Document();
+        LinkedList<Document> list = new LinkedList<>();
 
         int choice;
         do {
-            choice = Integer.parseInt(JOptionPane.showInputDialog("1: Esspresso\n" +
+            choice = Integer.parseInt(JOptionPane.showInputDialog("1: Espresso\n" +
                     "2: Latte\n" +
-                    "3: Cappochino\n" +
+                    "3: Cappuccino\n" +
                     "4: Hot Coco\n" +
                     "5: Brewed Coffee\n"));
         } while (choice <= 0 || choice > 5);
 
+        String name = "-1";
+        int price = -1;
+        int milk = -1;
+        int syrup = -1;
+        int bean = -1;
+
         switch (choice) {
             case 1:
-                coffee = 1; //Esspresso
-                product.append("name", "Esspresso")
-                        .append("price", 10)
-                        .append("ingredients", Arrays.asList(
-                                new Document("ingredientsID", 1)
-                        ));
+                name = "Espresso";
+                bean = 1;
+                price = 10;
                 break;
             case 2:
-                coffee = 2; //Latte
-                milkPick();
+                name = "Latte";
+                bean = 1;
+                price = 15;
+                milk = milkPick();
+                syrup = syrupPick();
                 break;
             case 3:
-                coffee = 3; //Cappochino
-                milkPick();
+                name = "Cappuccino";
+                bean = 1;
+                price = 15;
+                milk = milkPick();
+                syrup = syrupPick();
                 break;
             case 4:
-                coffee = 4; //Hot coco
-                milkPick();
+                name = "Hot coco";
+                bean = 4;
+                price = 25;
+                milk = milkPick();
+                syrup = syrupPick();
                 break;
             case 5:
-                coffee = 5; //Brewed Coffee
-                beanPick();
+                name = "Brewed Coffee";
+                bean = beanPick();
+                price = 5;
+                milk = milkPick();
+                syrup = syrupPick();
                 break;
         }
+
+        list.add(new Document("ingredientsID", bean));
+        if(milk != -1){
+            list.add(new Document("ingredientsID", milk));
+        }
+        if(syrup != -1){
+            list.add(new Document("ingredientsID", syrup));
+            price += 2;
+        }
+
+        product.append("name", name)
+                .append("price", price)
+                .append("ingredients", list);
 
         return product;
     }
 
-    private void milkPick() {
-
+    private int milkPick() {
         int choice;
         choice = Integer.parseInt(JOptionPane.showInputDialog("1: Skim milk\n" +
                 "2: Soy milk\n" +
@@ -274,70 +299,56 @@ public class Client {
                 "0: Exit milk"));
         switch (choice) {
             case 0:
-                milk = 0;
-                break;
+                return 0;
             case 1:
-                milk = 5;
-                syrupPick();
-                break;
+                return 5;
             case 2:
-                milk = 6;
-                syrupPick();
-                break;
+                return 6;
             case 3:
-                milk = 7;
-                syrupPick();
-                break;
+                return 7;
             case 4:
-                milk = 8;
-                syrupPick();
-                break;
+                return 8;
+            default:
+                return -1;
         }
     }
 
-    private void syrupPick() {
+    private int syrupPick() {
 
         int choice;
         choice = Integer.parseInt(JOptionPane.showInputDialog("1: Vanilla\n" +
                 "2: Caramel\n" +
                 "3: Irish\n" +
-                "0: Exit product"));
+                "0: No sirap"));
         switch (choice) {
             case 0:
-                System.out.println(coffee + " " + milk + " " + syrup);
-                //storeCollection.updateStock(coffee,milk,syrup);
-                System.exit(0);
+                return -1;
             case 1:
-                syrup = 9;
-                break;
+                return 9;
             case 2:
-                syrup = 10;
-                break;
+                return  10;
             case 3:
-                syrup = 11;
-                break;
+                return 11;
+            default:
+                return -1;
         }
     }
 
-    private void beanPick() {
+    private int beanPick() {
         int choice;
         choice = Integer.parseInt(JOptionPane.showInputDialog("1: French roast\n" +
                 "2: Light roast\n" +
                 "0: Exit coffee"));
         switch (choice) {
             case 0:
-                bean = 0;
-                break;
+                return -1;
             case 1:
-                bean = 2;
-                milkPick();
-                break;
+                return 2;
             case 2:
-                bean = 3;
-                milkPick();
-                break;
+                return 3;
+            default:
+                return 3;
         }
-
     }
 
     private void oldCustomer() {
