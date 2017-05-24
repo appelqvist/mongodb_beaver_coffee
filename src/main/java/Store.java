@@ -1,21 +1,11 @@
 import com.mongodb.BasicDBObject;
-import com.mongodb.DBObject;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
-import com.mongodb.client.model.InsertOneModel;
-import com.mongodb.client.model.Updates;
-import com.sun.tools.javac.util.*;
 import org.bson.Document;
 import org.bson.types.ObjectId;
-import sun.awt.SunHints;
-import sun.awt.image.ImageWatched;
-import sun.rmi.server.InactiveGroupException;
-
 import java.util.*;
 import java.util.List;
-
-import static com.mongodb.client.model.Filters.eq;
 
 /**
  * Created by Andréas Appelqvist on 2017-05-22.
@@ -75,46 +65,18 @@ public class Store {
         }
 
         for (int key : stockitems.keySet()) {
-            System.out.println(key + " dra av: " + stockitems.get(key));
 
-            /*
-            BasicDBObject q = new BasicDBObject("_id", storeId);
-            q.append("stock.id", key);
+            BasicDBObject q = new BasicDBObject();
+            q.put("_id", storeId);
+            q.put("stock.id", String.valueOf(key));
 
-            BasicDBObject u = new BasicDBObject().append("$inc",
-                    new BasicDBObject().append("units", -1 * stockitems.get(key)));
+            BasicDBObject data = new BasicDBObject();
+            data.put("stock.$.units", -1 * stockitems.get(key));
 
-            collection.updateOne(q, u);
-            */
+            BasicDBObject command = new BasicDBObject();
+            command.put("$inc", data);
 
-            BasicDBObject query = new BasicDBObject();
-            query.put("_id", storeId);
-            query.append("stock id", 1);
-
-            BasicDBObject update = new BasicDBObject()
-                    .append("$inc", new BasicDBObject().append("units", -1));
-
-            collection.updateOne(query, update);
-/*
-            {
-                "_id"  :  {
-                        "$oid" : "x"
-                 } ,
-                "hosting" : "hostA" ,
-                "clients" : "888" ,
-                "type" : "vps"
-
-            }
-
-            {
-                "_id"  :   {
-                        "$oid" : "x"
-                } ,
-                "hosting" : "hostB" ,
-                "type" : "dedicated server" ,
-                "clients" : 100
-            }
-       */
+            collection.updateOne(q, command);
         }
 
     }

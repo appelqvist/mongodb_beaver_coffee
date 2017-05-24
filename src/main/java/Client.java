@@ -43,7 +43,6 @@ public class Client {
                     "1: Employee \n" +
                     "2: Customer \n" +
                     "3: Store \n" +
-                    "4: Chose product\n" +
                     "0: Exit"));
             switch (choice) {
                 case 1:
@@ -161,10 +160,8 @@ public class Client {
             customerID = addCustomerPick();
         }
 
-        JOptionPane.showMessageDialog(null, "Du har nr:"+customerID.toString()+"\n" +
-                "fortsätt gärna!");
-
-
+        JOptionPane.showMessageDialog(null, "You have customerID:"+customerID.toString()+"\n" +
+                "Continue!");
 
         orderPick(pickStoreID(), customerID);
     }
@@ -404,7 +401,7 @@ public class Client {
                     String select = "Select one employee:\n";
                     int i = 0;
                     for (Document d : employees) {
-                        select += i + " : " + d.get("name");
+                        select += i + " : " + d.get("name") + "\n";
                         i++;
                     }
 
