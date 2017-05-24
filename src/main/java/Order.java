@@ -19,8 +19,4 @@ public class Order {
     public void addOrder(Document d){
         collection.insertOne(d);
     }
-
-    public void getOrder(ObjectId orderID){
-
-    }
 }

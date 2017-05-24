@@ -29,7 +29,6 @@ public class Employee {
                 .append("employment", new Document("position", position).append("startDate", startDate).append("endDate", endDate).append("workTime", workTime).append("storeID", storeID))
                 .append("comments", Arrays.asList());
 
-
         collection.insertOne(doc);
     }
 
@@ -53,36 +52,4 @@ public class Employee {
         Document comment = new Document().append("msg", msg).append("date", date).append("manager", manager);
         collection.updateOne(eq("_id", employeeID), Updates.addToSet("comments", comment));
     }
-
-    public void addOrder() {
-
-    }
-
-    public void updateOrder() {
-
-    }
-
-    public void deleteOrder() {
-
-    }
-
-    public void getStockSize() {
-
-    }
 }
-
-
-/*
-	"comments" : [
-            "comment" {
-            "msg" : "Need employee",
-            "date" : "2016-04-12",
-            "employerID" : "Admin"
-            },
-            "comment": {
-                "msg" : "hej"
-                "date" : "date"
-                "empleyerID" : "Admin"
-            }
-
-*/
