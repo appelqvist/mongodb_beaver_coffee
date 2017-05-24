@@ -2,7 +2,6 @@ import com.mongodb.MongoClient;
 import com.mongodb.client.MongoDatabase;
 import org.bson.Document;
 import org.bson.types.ObjectId;
-
 import javax.swing.*;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -95,7 +94,7 @@ public class Client {
     private void customerPick() {
         while (true) {
             int choice = Integer.parseInt(JOptionPane.showInputDialog("" +
-                    "Do purchase as:" +
+                    "Do purchase as:\n" +
                     "1: New Customer\n" +
                     "2: Old Customer \n" +
                     "0: Exit customer"));
@@ -220,9 +219,9 @@ public class Client {
     }
 
     private LinkedList<Document> removeProductFromOrder(LinkedList<Document> productlist){
-        String s = "Select the one you want to change:\n";
+        String s = "Select the one you want to remove:\n";
         for(int i = 0; i < productlist.size(); i++){
-            s += i + " : " + productlist.get(i).get("name");
+            s += i + " : " + productlist.get(i).get("name")+"\n";
         }
         int index = Integer.parseInt(JOptionPane.showInputDialog(s));
 
@@ -233,7 +232,7 @@ public class Client {
     private LinkedList<Document> changeOrderProduct(LinkedList<Document> productlist){
         String s = "Select the one you want to change:\n";
         for(int i = 0; i < productlist.size(); i++){
-            s += i + " : " + productlist.get(i).get("name");
+            s += i + " : " + productlist.get(i).get("name") + "\n";
         }
         int index = Integer.parseInt(JOptionPane.showInputDialog(s));
         productlist.set(index, productPick());
@@ -246,7 +245,8 @@ public class Client {
 
         int choice;
         do {
-            choice = Integer.parseInt(JOptionPane.showInputDialog("1: Espresso\n" +
+            choice = Integer.parseInt(JOptionPane.showInputDialog("Pick a product you want to add to order:\n" +
+                    "1: Espresso\n" +
                     "2: Latte\n" +
                     "3: Cappuccino\n" +
                     "4: Hot Coco\n" +
