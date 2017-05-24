@@ -6,6 +6,7 @@ import com.mongodb.client.model.InsertOneModel;
 import com.mongodb.client.model.Updates;
 import org.bson.Document;
 import org.bson.types.ObjectId;
+import sun.awt.image.ImageWatched;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -48,12 +49,14 @@ public class Store {
     public LinkedList<Document> getAllStores(){
         LinkedList<Document> stores = new LinkedList<>();
         MongoCursor<Document> cursor = collection.find().iterator();
-
         while (cursor.hasNext()) {
             stores.add(cursor.next());
         }
-
         return stores;
+    }
+
+    public void removeFromStock(ObjectId storeId, LinkedList<Document> productsBought){
+
     }
 
     /*

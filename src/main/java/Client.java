@@ -1,27 +1,12 @@
-import com.mongodb.BasicDBObject;
-import com.mongodb.DBObject;
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoDatabase;
-import com.mongodb.client.model.Updates;
-import jdk.internal.org.objectweb.asm.tree.analysis.Value;
 import org.bson.Document;
 import org.bson.types.ObjectId;
-import sun.awt.image.ImageWatched;
 
-import javax.print.Doc;
 import javax.swing.*;
-import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
-import java.lang.reflect.Array;
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.LinkedList;
-import java.util.List;
-
-import static com.mongodb.client.model.Filters.all;
-import static com.mongodb.client.model.Filters.eq;
 
 /**
  * Created by Andréas Appelqvist on 2017-05-15.
@@ -34,9 +19,6 @@ public class Client {
     private Employee employeeCollection;
     private Store storeCollection;
     private Order orderCollection;
-    private Product productCollection;
-    private ArrayList<Order> orderList = new ArrayList<Order>();
-
 
     public Client(String host) {
         //instance the client
@@ -49,10 +31,7 @@ public class Client {
         customerCollection = new Customer(mongoDatabase);
         employeeCollection = new Employee(mongoDatabase);
         storeCollection = new Store(mongoDatabase);
-        //managerCollection = new Manager(mongoDatabase);
         orderCollection = new Order(mongoDatabase);
-        //productCollection = new Product(mongoDatabase);
-        //stockCollection = new Stock(mongoDatabase);
     }
 
     /**
@@ -76,9 +55,6 @@ public class Client {
                     break;
                 case 3:
                     storePick();
-                    break;
-                case 4:
-                    productPick();
                     break;
                 case 9:
                     break;
@@ -189,36 +165,81 @@ public class Client {
         JOptionPane.showMessageDialog(null, "Du har nr:"+customerID.toString()+"\n" +
                 "fortsätt gärna!");
 
+
+
         orderPick(pickStoreID(), customerID);
     }
 
     private void orderPick(ObjectId storeID, ObjectId customerID){
         int choice;
-        LinkedList list = new LinkedList<Document>();
+        LinkedList<Document> products = new LinkedList<>();
         do {
             Document product = productPick();
-            list.add(product);
+            products.add(product);
             choice = Integer.parseInt(JOptionPane.showInputDialog("Buy another product?\n" +
                     "1: YES!\n" +
                     "2: NO"));
         }while(choice != 2);
 
-
-
         Document order = new Document("storeID", storeID)
                 .append("customerID", customerID)
                 .append("employeeID", pickEmployeeID(storeID))
-                .append("products", list);
+                .append("products", products);
 
+        String orderStr;
+        int c = 0;
+        do{
+            orderStr = "This is your order:\n";
+            for(Document p : products){
+                orderStr += p.get("name")+"\n";
+            }
 
-        //Efter godkänande!!!
-        orderCollection.addOrder(order); //Efter koll att inga behövs göras eller fråga en kund om du är redo
+            orderStr += "Ask employee to change current order? Or are you happy with the order?\n" +
+                    "1 : I want to change my order\n" +
+                    "2 : Remove product from order \n"+
+                    "3 : This looks good! I want to finalise my order! Take my money!";
+
+            c = Integer.parseInt(JOptionPane.showInputDialog(orderStr));
+
+            if(c == 1){
+                products = changeOrderProduct(products);
+                order.append("products", products);
+            }else if(c == 2){
+                products = removeProductFromOrder(products);
+                order.append("products", products);
+            }
+
+        }while (c != 3);
+
+        //Dra av från stock.
+        storeCollection.removeFromStock(storeID, products);
+
+        String today = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
+        order.append("date", today);
+        orderCollection.addOrder(order);
     }
 
-    /**
-     * Returns a document of ONE product
-     * @return
-     */
+    private LinkedList<Document> removeProductFromOrder(LinkedList<Document> productlist){
+        String s = "Select the one you want to change:\n";
+        for(int i = 0; i < productlist.size(); i++){
+            s += i + " : " + productlist.get(i).get("name");
+        }
+        int index = Integer.parseInt(JOptionPane.showInputDialog(s));
+
+        productlist.remove(index);
+        return productlist;
+    }
+
+    private LinkedList<Document> changeOrderProduct(LinkedList<Document> productlist){
+        String s = "Select the one you want to change:\n";
+        for(int i = 0; i < productlist.size(); i++){
+            s += i + " : " + productlist.get(i).get("name");
+        }
+        int index = Integer.parseInt(JOptionPane.showInputDialog(s));
+        productlist.set(index, productPick());
+        return productlist;
+    }
+
     private Document productPick() {
         Document product = new Document();
         LinkedList<Document> list = new LinkedList<>();
@@ -292,14 +313,15 @@ public class Client {
 
     private int milkPick() {
         int choice;
-        choice = Integer.parseInt(JOptionPane.showInputDialog("1: Skim milk\n" +
+        choice = Integer.parseInt(JOptionPane.showInputDialog("Any milk?\n" +
+                "1: Skim milk\n" +
                 "2: Soy milk\n" +
                 "3: Whole milk\n" +
                 "4: 2% milk\n" +
-                "0: Exit milk"));
+                "0: No milk"));
         switch (choice) {
             case 0:
-                return 0;
+                return -1;
             case 1:
                 return 5;
             case 2:
@@ -316,9 +338,10 @@ public class Client {
     private int syrupPick() {
 
         int choice;
-        choice = Integer.parseInt(JOptionPane.showInputDialog("1: Vanilla\n" +
-                "2: Caramel\n" +
-                "3: Irish\n" +
+        choice = Integer.parseInt(JOptionPane.showInputDialog("Want to add syrup? (can cost extra)\n" +
+                " 1: Vanilla \n" +
+                "2: Caramel \n" +
+                "3: Irish \n" +
                 "0: No sirap"));
         switch (choice) {
             case 0:
@@ -337,8 +360,7 @@ public class Client {
     private int beanPick() {
         int choice;
         choice = Integer.parseInt(JOptionPane.showInputDialog("1: French roast\n" +
-                "2: Light roast\n" +
-                "0: Exit coffee"));
+                "2: Light roast\n"));
         switch (choice) {
             case 0:
                 return -1;
@@ -349,10 +371,6 @@ public class Client {
             default:
                 return 3;
         }
-    }
-
-    private void oldCustomer() {
-        int cID = Integer.parseInt(JOptionPane.showInputDialog("Plix gief us your customer ID"));
     }
 
     private void employeePick() {
@@ -460,30 +478,6 @@ public class Client {
         } while (id < 0 || id > storeCityStreet.length);
 
         return ids[id];
-    }
-
-    private void testList() {
-        try (BufferedReader br = new BufferedReader(new FileReader("src/productList.txt"))) {
-            StringBuilder sb = new StringBuilder();
-            String line = br.readLine();
-
-            while (line != null) {
-                sb.append(line);
-                sb.append(System.lineSeparator());
-                line = br.readLine();
-            }
-            String everything = sb.toString();
-            fillList(everything);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void fillList(String everything) {
-        int choice = Integer.parseInt(JOptionPane.showInputDialog(everything));
-
     }
 
 }
